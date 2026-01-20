@@ -7,14 +7,11 @@ import { AuthProvider } from './hooks/useAuth';
 import { AppThemeProvider } from './theme/AppThemeProvider';
 import './utils/chartSetup';
 
-const routerBase = import.meta.env.BASE_URL;
-const hashBasename = routerBase === '/' ? undefined : routerBase;
-
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <AuthProvider>
       <AppThemeProvider>
-        <HashRouter basename={hashBasename}>
+        <HashRouter>
           <CssBaseline />
           <App />
         </HashRouter>
