@@ -13,9 +13,13 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationProvider';
 import { LoadingFallback } from './components/LoadingFallback';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { OfflineIndicator } from './components/OfflineIndicator';
+import { ServiceWorkerUpdateToast } from './components/ServiceWorkerUpdateToast';
 
 const App: React.FC = () => (
   <NotificationProvider>
+    <ServiceWorkerUpdateToast />
+    <OfflineIndicator />
     <ErrorBoundary fallback={<LoadingFallback />}>
       <Routes>
         <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
