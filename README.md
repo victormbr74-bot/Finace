@@ -1,57 +1,42 @@
-# Sou Financas
+# Sou Finanças
 
-Aplicacao React + Vite + TypeScript com UI Material UI, Dexie para IndexedDB, Chart.js e modulos de planejamento financeiro local.
+**Sou Finanças** já está preparado para rodar como app financeiro instalável, funcionar em GitHub Pages e sobreviver a conexões instáveis.
 
-## Como comecar
+## Local development & verificação
 
-1. `npm install`
-2. `npm run dev` (localhost:5173)
-3. `npm run build`
+- `npm install` (já feito) para sincronizar dependências.
+- `npm run dev` levanta o servidor de desenvolvimento (Vite) sem base customizada.
+- `npm run build` gera `dist/` usando o `base` configurado por `VITE_GH_PAGES_BASE` ou pelo campo `homepage` do `package.json`.
+- `npm run preview` serve a build final para testes de forma idêntica ao Pages.
+- `npm run check` roda o `tsc -b` caso você queira manter o type-check separado da build.
 
-## Estrutura
+## GitHub Pages e base
 
-- `src/db`: Dexie com tabelas `users`, `categories`, `transactions`, `savingGoals`, `savingEntries`, `settings`, `sessions`
-- `src/services`: autenticao, transacoes, metas, seeds, configuracoes
-- `src/hooks`: contexto de autenticacao e sessao
-- `src/theme`: ThemeProvider com dark mode, cor principal configuravel e persistencia
-- `src/components` / `src/pages`: layout responsivo, Drawer, BottomNavigation, formularios com `react-hook-form` + `zod`
+- O `vite.config.ts` lê `VITE_GH_PAGES_BASE` (ex.: `/finance-hunter/`) para definir `base` e o `start_url` da PWA; se não estiver setado, usa `homepage` em `package.json` ou `/`.
+- Configure a variável de ambiente `VITE_GH_PAGES_BASE` antes de rodar `npm run build` para garantir que o HashRouter crie rotas como `/#/app/dashboard` dentro do subdiretório do repositório.
+- Se preferir usar `homepage`, adicione algo como `"homepage": "https://<seu-usuário>.github.io/<repo>/"` em `package.json`.
+- O `HashRouter` já está configurado para respeitar `import.meta.env.BASE_URL`, portanto os links de rota continuam funcionando sem `BrowserRouter`.
 
-## Rotas
+## PWA e continuidade offline
 
-- `/login`, `/register`
-- `/app/dashboard`, `/app/transactions`, `/app/savings`, `/app/reports`, `/app/profile`
-- Rotas `/app/*` protegem o conteudo e redirecionam para `/login`
-- Drawer lateral permanente no desktop, menu inferior no mobile, topbar com seletores de tema/cor e botao de adicionar
+- O `vite-plugin-pwa` registra o service worker automaticamente (`registerType: "autoUpdate"`) e fornece manifest + icons (192x192, 512x512, maskable, apple touch).
+- Há um `Snackbar` discreto que aparece quando uma nova versão é baixada, permitindo “Atualizar” com `skipWaiting`.
+- Um banner fixo informa quando o dispositivo está offline e permite tentar novamente (recarregando a página).
+- O cache inclui JS/CSS/assets/Vite chunks e o fallback de navegação (`navigateFallback`) evita a tela branca mesmo quando a conexão falha.
 
-## Persistencia
+## Deploy automático com GitHub Actions
 
-Todos os dados ficam no IndexedDB do projeto (`finance-db`) nas tabelas definidas pelo Dexie. Sao armazenados:
+- O workflow `.github/workflows/deploy.yml`:
+  1. Executa `npm ci`/`npm run build` com Node 20.
+  2. Publica `dist/` como artefato de páginas.
+  3. Chama `actions/deploy-pages@v1` para atualizar o GitHub Pages em `gh-pages` (com permissão adequada).
+  4. Define automaticamente `VITE_GH_PAGES_BASE` como `/${{ github.event.repository.name }}/`.
+- Para habilitar o Pages, vá em **Settings > Pages**, escolha a fonte “GitHub Actions”, branch `gh-pages` e o diretório raiz `/`.
+- A URL final esperada é `https://<seu-usuário>.github.io/<seu-repositório>/`; atualize o nome de usuário/repos nome conforme necessário.
 
-- Usuarios (email, senha hashed com bcryptjs)
-- Transacoes (tipo, valor, categoria, forma de pagamento, recorrencia)
-- Categorias (padrao + personalizadas)
-- Metas de poupanca e entradas mensais
-- Configuracoes (tema, cor, moeda)
-- Sessao atual (tabela `sessions` com registro `current`)
+## Comandos úteis
 
-## Limpar e seeds
-
-Use o botao **Gerar dados demo** na pagina de Perfil para popular transacoes, metas e categorias. O botao **Resetar dados locais** limpa toda a base (transacoes, categorias, metas, entradas, configuracoes e sessao).
-
-## Qualidade
-
-- Formulario e validacao controlada com Zod e React Hook Form
-- Feedback com Snackbar e ErrorBoundary
-- Layout responsivo mobile-first (Drawer + BottomNavigation)
-- Grafico com Chart.js (linha, barra, rosca)
-- Tema customizavel via AppThemeProvider
-
-## Ideias futuras
-
-1. Orçamento por categoria com alertas de limite
-2. Notificacoes locais para lancar gastos e depositos
-3. Recorrencias automáticas para contas fixas
-4. Modo casal/familia com multiplos perfis
-5. Anexo ou nota por transacao (base64 ou File System Access)
-6. Tela de insights com detecao de padroes e comparativos
-7. Backup/restore completo via JSON
+- `npm run dev` — desenvolvimento com recarregamento automático.
+- `npm run build` — build otimizado respeitando a base definida.
+- `npm run preview` — preview local da build final.
+- `npm run check` — validação de tipos isolada.
